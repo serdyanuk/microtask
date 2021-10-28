@@ -12,7 +12,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-var ErrFormat = image.ErrFormat
+const MaxResizePower = 10
 
 type ImgManager struct {
 	path string
@@ -20,79 +20,146 @@ type ImgManager struct {
 
 // New creates a new ImgManager
 // path - is path to files
-func New(path string) *ImgManager {
-	return &ImgManager{
+func New(path string) (*ImgManager, error) {
+	m := &ImgManager{
 		path: path,
 	}
+	if err := m.init(); err != nil {
+		return nil, err
+	}
+
+	return m, nil
 }
 
-func (m *ImgManager) SaveImage(r io.Reader) (filename string, err error) {
-	img, ext, err := decodeImage(r)
-	if err != nil {
-		return "", err
+func (m *ImgManager) init() error {
+	err := os.MkdirAll(m.path, 0755)
+	if os.IsExist(err) {
+		return nil
 	}
-	filename = generateFileName(ext)
-	filepath := m.getFilePath(filename)
-	f, err := os.Create(filepath)
 	if err != nil {
-		return "", err
+		return err
+	}
+	return nil
+}
+
+func (m *ImgManager) ReadAndSaveNewImage(r io.Reader) (stat *ImageStat, err error) {
+	img, ext, err := image.Decode(r)
+	if err != nil {
+		return nil, err
+	}
+
+	stat, err = m.save(img, generateFileName(ext))
+	if err != nil {
+		return nil, err
+	}
+
+	return stat, nil
+}
+
+func (m *ImgManager) LoadAndResize(filename string, power uint8) (*ResizeResult, error) {
+	if power == 0 || power > MaxResizePower {
+		power = MaxResizePower
+	}
+	img, stat, err := m.loadImage(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	resizedImage := m.resize(img, power)
+	newStat, err := m.save(resizedImage, filename)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ResizeResult{
+		Before: stat,
+		After:  newStat,
+	}, nil
+}
+
+func (m *ImgManager) resize(img image.Image, power uint8) image.Image {
+	p := img.Bounds().Size()
+	x := uint(p.X) / uint(power)
+	y := uint(p.Y) / uint(power)
+
+	return resize.Resize(x, y, img, resize.Lanczos3)
+}
+
+func (m *ImgManager) save(img image.Image, filename string) (stat *ImageStat, err error) {
+	f, err := os.Create(m.getFilePath(filename))
+	if err != nil {
+		return nil, err
 	}
 	defer f.Close()
 
-	err = encodeImage(f, img, ext)
-	if err != nil {
-		return "", err
+	if err := encodeImage(f, img, filename); err != nil {
+		return nil, err
 	}
-	return filename, nil
+
+	return createImageStat(f, img, filename)
 }
 
 func (m *ImgManager) getFilePath(filename string) string {
 	return filepath.Join(m.path, filename)
 }
 
-func (m *ImgManager) DoResize(filename string) error {
-	filepath := m.getFilePath(filename)
-	f, err := os.Open(filepath)
+func (m *ImgManager) loadImage(filename string) (img image.Image, stat *ImageStat, err error) {
+	f, err := os.Open(m.getFilePath(filename))
 	if err != nil {
-		return err
-	}
-	img, ext, err := decodeImage(f)
-	f.Close()
-	if err != nil {
-		return err
-	}
-	f, err = os.Create(filepath)
-	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	defer f.Close()
-	img = resize.Resize(1000, 0, img, resize.Lanczos3)
-	return encodeImage(f, img, ext)
-}
 
-func encodeImage(w io.Writer, img image.Image, ext string) (err error) {
-	switch ext {
-	case "jpeg":
-		err = jpeg.Encode(w, img, nil)
-	case "png":
-		err = png.Encode(w, img)
-	default:
-		err = ErrFormat
-	}
-	return err
-}
-
-func decodeImage(r io.Reader) (image.Image, string, error) {
-	img, ext, err := image.Decode(r)
-	if err == image.ErrFormat {
-		return nil, "", ErrFormat
-	}
+	img, _, err = image.Decode(f)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
-	return img, ext, nil
+
+	stat, err = createImageStat(f, img, filename)
+	if err != nil {
+		return nil, nil, err
+	}
+	return img, stat, err
 }
 
+func encodeImage(w io.Writer, img image.Image, filename string) (err error) {
+	switch filepath.Ext(filename) {
+	case ".jpeg":
+		return jpeg.Encode(w, img, nil)
+	case ".png":
+		return png.Encode(w, img)
+	default:
+		return image.ErrFormat
+	}
+}
+
+// generateFileName generates filename based on uuid and file extension
 func generateFileName(ext string) string {
 	return uuid.NewString() + "." + ext
+}
+
+func createImageStat(f *os.File, img image.Image, filename string) (*ImageStat, error) {
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	size := img.Bounds().Size()
+	return &ImageStat{
+		Name:   filename,
+		Width:  uint(size.X),
+		Height: uint(size.Y),
+		Size:   info.Size(),
+	}, nil
+}
+
+type ResizeResult struct {
+	Before *ImageStat
+	After  *ImageStat
+}
+
+type ImageStat struct {
+	Name   string
+	Width  uint
+	Height uint
+	Size   int64
 }

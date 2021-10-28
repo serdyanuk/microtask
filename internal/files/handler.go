@@ -19,17 +19,19 @@ func uploadImage(imgm *imgmanager.ImgManager) httprouter.Handle {
 			return
 		}
 		defer file.Close()
-		filename, err := imgm.SaveImage(file)
+		stat, err := imgm.ReadAndSaveNewImage(file)
 		if err != nil {
 			resError(rw, err)
 			return
 		}
-		err = imgm.DoResize(filename)
+		res, err := imgm.LoadAndResize(stat.Name, 3)
 		if err != nil {
 			resError(rw, err)
 			return
 		}
-		fmt.Fprintf(rw, "file %s was uploaded", filename)
+		fmt.Println(res.Before, res.After)
+		fmt.Println(stat)
+		fmt.Fprintf(rw, "file %s was uploaded", stat.Name)
 	}
 }
 

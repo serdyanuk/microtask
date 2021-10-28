@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/serdyanuk/microtask/config"
@@ -10,9 +9,11 @@ import (
 )
 
 func main() {
-	fmt.Println(1)
 	cfg := config.Get()
-	imgm := imgmanager.New(cfg.Storage.FilesDir)
+	imgm, err := imgmanager.New(cfg.Storage.FilesDir)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	s := files.NewApiServer(cfg.FilesService, imgm)
 	log.Fatal(s.Run())
