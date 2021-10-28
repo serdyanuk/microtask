@@ -1,0 +1,47 @@
+services:
+
+  files_serivces:
+    image: golang:1.16.9-alpine
+    working_dir: /app
+    ports:
+      - 4000:4000
+    networks:
+      - backend
+    volumes:
+      - ./:/app
+      - go-modules:/go/pkg/mod
+    command: sh -c "go mod download && go run ./cmd/files/main.go"
+
+  # processing_service:
+  #   image: golang:1.17.1-alpine
+  #   depends_on:
+  #     - rabbitmq
+  #   working_dir: /app
+  #   networks:
+  #     - backend
+  #   volumes:
+  #      - ./:/app
+  #      - go-modules:/go/pkg/mod
+  #   command: sh -c "go mod download && go run ./cmd/processing/main.go"
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    hostname: "rabbit1"
+    networks:
+      - backend
+    ports:
+      # - "5672:5672"
+      - "15672:15672"
+    labels:
+      NAME: "rabbitmq1"
+    environment:
+      RABBITMQ_DEFAULT_USER: test
+      RABBITMQ_DEFAULT_PASS: secret
+      # RABBITMQ_DEFAULT_VHOST: "/"
+    
+volumes:
+  go-modules:
+
+networks:
+  backend:
+    driver: bridge

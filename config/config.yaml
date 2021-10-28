@@ -1,0 +1,9 @@
+filesService:
+  port: :4000
+  fileSizeLimit: 10mb
+
+storage:
+  filesDir: ./data/images
+
+rabbitmq:
+  url: amqp://test:secret@rabbit1:5672/
