@@ -1,7 +1,6 @@
 package files
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -13,15 +12,18 @@ import (
 
 func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPublisher, logger *logger.Logger) httprouter.Handle {
 	return func(rw http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		rw.Header().Add("Access-Control-Allow-Origin", "*")
+
 		file, _, err := r.FormFile("image")
 		if err != nil {
 			internalError(rw, logger, err)
 			return
 		}
 		defer file.Close()
+
 		stat, err := imgm.ReadAndSaveNewImage(file)
 		if err != nil {
-			if errors.Is(err, imgmanager.ErrUnsupportedFormat) {
+			if imgmanager.IsUnknowFormatErr(err) {
 				http.Error(rw, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
 				return
 			}
@@ -35,13 +37,13 @@ func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPubl
 			return
 		}
 
-		logger.Infof("loaded a new image: %s", stat)
+		logger.Infof("new image saved to disk %s", stat)
 
-		fmt.Fprintf(rw, "file %s was uploaded", stat.ID)
+		fmt.Fprintf(rw, "OK")
 	}
 }
 
 func internalError(rw http.ResponseWriter, logger *logger.Logger, err error) {
-	logger.Println(err)
+	logger.Error(err)
 	http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
