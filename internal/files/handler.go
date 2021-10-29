@@ -10,13 +10,17 @@ import (
 	"github.com/serdyanuk/microtask/pkg/logger"
 )
 
+// fileSizeLimit 		= 5mb
+const fileSizeLimit = 5 << 20
+
 func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPublisher, logger *logger.Logger) httprouter.Handle {
 	return func(rw http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		rw.Header().Add("Access-Control-Allow-Origin", "*")
 
+		r.Body = http.MaxBytesReader(rw, r.Body, fileSizeLimit)
 		file, _, err := r.FormFile("image")
 		if err != nil {
-			internalError(rw, logger, err)
+			http.Error(rw, http.StatusText(http.StatusRequestEntityTooLarge), http.StatusRequestEntityTooLarge)
 			return
 		}
 		defer file.Close()
