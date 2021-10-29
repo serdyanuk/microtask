@@ -45,7 +45,7 @@ func (o *Optimizer) Run() error {
 				return
 			}
 
-			o.logger.Infof("receive message: id=%s x=%d y=%d size=%d", msg.ID, msg.Width, msg.Height, msg.Size)
+			o.logger.Infof("receive message: %s", msg)
 
 			stat, err := o.resizer.LoadAndResize(msg.ID, o.cfg.ResizePower)
 			if err != nil {
@@ -53,7 +53,7 @@ func (o *Optimizer) Run() error {
 				continue
 			}
 
-			o.logger.Infof("image resizing success: id=%s x=%d y=%d size=%d", stat.ID, stat.Width, stat.Height, stat.Size)
+			o.logger.Infof("image resizing success: %s", stat)
 		}
 	}()
 	<-forever

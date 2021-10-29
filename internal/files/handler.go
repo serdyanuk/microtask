@@ -35,6 +35,8 @@ func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPubl
 			return
 		}
 
+		logger.Infof("loaded a new image: %s", stat)
+
 		fmt.Fprintf(rw, "file %s was uploaded", stat.ID)
 	}
 }

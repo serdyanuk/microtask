@@ -3,6 +3,7 @@ package imgmanager
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -169,4 +170,13 @@ func (m *ImageStat) MustMarshal() []byte {
 		panic(err)
 	}
 	return b
+}
+
+func (m ImageStat) String() string {
+	var kb float64
+	if m.Size != 0 {
+		kb = float64(m.Size) / 1024
+	}
+
+	return fmt.Sprintf("id=%s x=%d y=%d size=%.2fK", m.ID, m.Width, m.Height, kb)
 }
