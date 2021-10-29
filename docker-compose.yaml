@@ -41,7 +41,18 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: test
       RABBITMQ_DEFAULT_PASS: secret
-    
+  
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui_container
+    networks:
+      - backend
+    ports:
+      - 3000:8080
+    volumes:
+      - ./api:/usr/share/nginx/html/api
+    environment:
+      URLS: "[{ url: \"api/openapi.yaml\", name: \"Files-API\" }]"
 volumes:
   go-modules:
 

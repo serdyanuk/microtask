@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: API documentation
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:4000/api/v1/
+
+paths:
+  /image:
+    post:
+      description: uploading image on server
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+            encoding:
+              profileImage:
+                contentType: image/png, image/jpeg
+      responses:
+        200:
+          description: "Image uploaded successfully"
+        400:
+          description: "Bad Request"
+        405:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
