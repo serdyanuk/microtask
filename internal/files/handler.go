@@ -3,8 +3,6 @@ package files
 import (
 	"errors"
 	"fmt"
-	_ "image/jpeg"
-	_ "image/png"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
