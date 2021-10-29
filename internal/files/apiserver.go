@@ -5,24 +5,27 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/serdyanuk/microtask/config"
+	"github.com/serdyanuk/microtask/internal/rabbitmq"
 	"github.com/serdyanuk/microtask/pkg/imgmanager"
 )
 
 type ApiServer struct {
 	cfg        config.FilesService
 	imgmanager *imgmanager.ImgManager
+	publisher  *rabbitmq.ProcessingPublisher
 }
 
-func NewApiServer(cfg config.FilesService, imgm *imgmanager.ImgManager) *ApiServer {
+func NewApiServer(cfg config.FilesService, imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPublisher) *ApiServer {
 	return &ApiServer{
 		cfg:        cfg,
 		imgmanager: imgm,
+		publisher:  publisher,
 	}
 }
 
 func (s *ApiServer) Run() error {
 	r := httprouter.New()
-	r.POST("/api/v1/image", uploadImage(s.imgmanager))
+	r.POST("/api/v1/image", uploadImage(s.imgmanager, s.publisher))
 
 	return http.ListenAndServe(s.cfg.Port, r)
 }

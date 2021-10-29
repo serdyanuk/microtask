@@ -1,6 +1,7 @@
 package files
 
 import (
+	"errors"
 	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
@@ -8,34 +9,40 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/serdyanuk/microtask/internal/rabbitmq"
 	"github.com/serdyanuk/microtask/pkg/imgmanager"
 )
 
-func uploadImage(imgm *imgmanager.ImgManager) httprouter.Handle {
+func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPublisher) httprouter.Handle {
 	return func(rw http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		file, _, err := r.FormFile("image")
 		if err != nil {
-			resError(rw, err)
+			internalError(rw, err)
 			return
 		}
 		defer file.Close()
 		stat, err := imgm.ReadAndSaveNewImage(file)
 		if err != nil {
-			resError(rw, err)
+			if errors.Is(err, imgmanager.ErrUnsupportedFormat) {
+				http.Error(rw, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
+				return
+			}
+			log.Println(err)
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		res, err := imgm.LoadAndResize(stat.Name, 3)
+
+		err = publisher.Publish(stat)
 		if err != nil {
-			resError(rw, err)
+			internalError(rw, err)
 			return
 		}
-		fmt.Println(res.Before, res.After)
-		fmt.Println(stat)
-		fmt.Fprintf(rw, "file %s was uploaded", stat.Name)
+
+		fmt.Fprintf(rw, "file %s was uploaded", stat.ID)
 	}
 }
 
-func resError(rw http.ResponseWriter, err error) {
+func internalError(rw http.ResponseWriter, err error) {
 	log.Println(err)
-	rw.Write([]byte(err.Error()))
+	http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
