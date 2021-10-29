@@ -1,6 +1,6 @@
 filesService:
   port: :4000
-  # fileSizeLimit: 10mb
+  fileSizeLimit: 10mb
 
 storage:
   filesDir: ./data/images
