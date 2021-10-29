@@ -3,18 +3,20 @@ package rabbitmq
 import (
 	"github.com/serdyanuk/microtask/config"
 	"github.com/serdyanuk/microtask/pkg/imgmanager"
+	"github.com/serdyanuk/microtask/pkg/logger"
 	"github.com/streadway/amqp"
 )
 
 type ProcessingPublisher struct {
-	cfg   *config.Rabbitmq
-	conn  *amqp.Connection
-	ch    *amqp.Channel
-	queue amqp.Queue
+	cfg    *config.Rabbitmq
+	conn   *amqp.Connection
+	ch     *amqp.Channel
+	queue  amqp.Queue
+	logger *logger.Logger
 }
 
-func NewProcessingPublisher(cfg *config.Rabbitmq) (*ProcessingPublisher, error) {
-	conn, err := connect(cfg)
+func NewProcessingPublisher(cfg *config.Rabbitmq, logger *logger.Logger) (*ProcessingPublisher, error) {
+	conn, err := connect(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -34,10 +36,11 @@ func NewProcessingPublisher(cfg *config.Rabbitmq) (*ProcessingPublisher, error) 
 		return nil, err
 	}
 	return &ProcessingPublisher{
-		cfg:   cfg,
-		conn:  conn,
-		ch:    ch,
-		queue: queue,
+		cfg:    cfg,
+		conn:   conn,
+		ch:     ch,
+		queue:  queue,
+		logger: logger,
 	}, nil
 }
 

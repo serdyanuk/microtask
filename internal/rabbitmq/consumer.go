@@ -2,22 +2,25 @@ package rabbitmq
 
 import (
 	"github.com/serdyanuk/microtask/config"
+	"github.com/serdyanuk/microtask/pkg/logger"
 	"github.com/streadway/amqp"
 )
 
 type ProcessingConsumer struct {
-	conn *amqp.Connection
-	cfg  *config.Rabbitmq
+	conn   *amqp.Connection
+	cfg    *config.Rabbitmq
+	logger *logger.Logger
 }
 
-func NewProcessingConsumer(cfg *config.Rabbitmq) (*ProcessingConsumer, error) {
-	conn, err := connect(cfg)
+func NewProcessingConsumer(cfg *config.Rabbitmq, logger *logger.Logger) (*ProcessingConsumer, error) {
+	conn, err := connect(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
 	return &ProcessingConsumer{
-		conn: conn,
-		cfg:  cfg,
+		conn:   conn,
+		cfg:    cfg,
+		logger: logger,
 	}, nil
 }
 

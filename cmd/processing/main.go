@@ -1,26 +1,27 @@
 package main
 
 import (
-	"log"
-
 	"github.com/serdyanuk/microtask/config"
 	"github.com/serdyanuk/microtask/internal/processing"
 	"github.com/serdyanuk/microtask/internal/rabbitmq"
 	"github.com/serdyanuk/microtask/pkg/imgmanager"
+	"github.com/serdyanuk/microtask/pkg/logger"
 )
 
 func main() {
 	cfg := config.Get()
-	consumer, err := rabbitmq.NewProcessingConsumer(&cfg.Rabbitmq)
+	logger := logger.Get()
+
+	consumer, err := rabbitmq.NewProcessingConsumer(&cfg.Rabbitmq, logger)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	imgm, err := imgmanager.New(cfg.Storage.FilesDir)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	o := processing.NewOptimizer(cfg.ProcessingService, consumer, imgm)
-	log.Fatal(o.Run())
+	o := processing.NewOptimizer(cfg.ProcessingService, consumer, imgm, logger)
+	logger.Fatal(o.Run())
 }

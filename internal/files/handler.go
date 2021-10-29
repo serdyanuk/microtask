@@ -5,19 +5,19 @@ import (
 	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
-	"log"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/serdyanuk/microtask/internal/rabbitmq"
 	"github.com/serdyanuk/microtask/pkg/imgmanager"
+	"github.com/serdyanuk/microtask/pkg/logger"
 )
 
-func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPublisher) httprouter.Handle {
+func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPublisher, logger *logger.Logger) httprouter.Handle {
 	return func(rw http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		file, _, err := r.FormFile("image")
 		if err != nil {
-			internalError(rw, err)
+			internalError(rw, logger, err)
 			return
 		}
 		defer file.Close()
@@ -27,14 +27,13 @@ func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPubl
 				http.Error(rw, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
 				return
 			}
-			log.Println(err)
-			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			internalError(rw, logger, err)
 			return
 		}
 
 		err = publisher.Publish(stat)
 		if err != nil {
-			internalError(rw, err)
+			internalError(rw, logger, err)
 			return
 		}
 
@@ -42,7 +41,7 @@ func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPubl
 	}
 }
 
-func internalError(rw http.ResponseWriter, err error) {
-	log.Println(err)
+func internalError(rw http.ResponseWriter, logger *logger.Logger, err error) {
+	logger.Println(err)
 	http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
