@@ -9,7 +9,7 @@ servers:
 paths:
   /image:
     post:
-      description: uploading image on server
+      summary: "uploads images to the server"
       requestBody:
         content:
           multipart/form-data:
@@ -25,9 +25,31 @@ paths:
       responses:
         200:
           description: "Image uploaded successfully"
+          content:
+            text/plain:
+              schema:
+                type: string
         400:
           description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: string
         405:
           description: "Unsupported Media Type"
+          content:
+            text/plain:
+              schema:
+                type: string
+        413:
+          description: "Request Entity Too Large"
+          content:
+            text/plain:
+              schema:
+                type: string
         500:
           description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: string
