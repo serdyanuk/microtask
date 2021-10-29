@@ -23,5 +23,5 @@ func main() {
 	}
 
 	s := files.NewApiServer(cfg.FilesService, imgm, publisher, logger)
-	logger.Fatal(s.Run())
+	s.Run()
 }
