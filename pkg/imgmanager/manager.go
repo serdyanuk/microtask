@@ -1,6 +1,8 @@
 package imgmanager
 
 import (
+	"encoding/json"
+	"errors"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -14,8 +16,14 @@ import (
 
 const MaxResizePower = 10
 
+var ErrUnsupportedFormat = errors.New("imgmanager: unsupported format")
+
 type ImgManager struct {
 	path string
+}
+
+type Resizer interface {
+	LoadAndResize(filename string, power uint8) (*ImageStat, error)
 }
 
 // New creates a new ImgManager
@@ -24,14 +32,10 @@ func New(path string) (*ImgManager, error) {
 	m := &ImgManager{
 		path: path,
 	}
-	if err := m.init(); err != nil {
-		return nil, err
-	}
-
 	return m, nil
 }
 
-func (m *ImgManager) init() error {
+func (m *ImgManager) checkFolder() error {
 	err := os.MkdirAll(m.path, 0755)
 	if os.IsExist(err) {
 		return nil
@@ -56,11 +60,11 @@ func (m *ImgManager) ReadAndSaveNewImage(r io.Reader) (stat *ImageStat, err erro
 	return stat, nil
 }
 
-func (m *ImgManager) LoadAndResize(filename string, power uint8) (*ResizeResult, error) {
+func (m *ImgManager) LoadAndResize(filename string, power uint8) (*ImageStat, error) {
 	if power == 0 || power > MaxResizePower {
 		power = MaxResizePower
 	}
-	img, stat, err := m.loadImage(filename)
+	img, _, err := m.loadImage(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +75,7 @@ func (m *ImgManager) LoadAndResize(filename string, power uint8) (*ResizeResult,
 		return nil, err
 	}
 
-	return &ResizeResult{
-		Before: stat,
-		After:  newStat,
-	}, nil
+	return newStat, nil
 }
 
 func (m *ImgManager) resize(img image.Image, power uint8) image.Image {
@@ -86,6 +87,9 @@ func (m *ImgManager) resize(img image.Image, power uint8) image.Image {
 }
 
 func (m *ImgManager) save(img image.Image, filename string) (stat *ImageStat, err error) {
+	if err = m.checkFolder(); err != nil {
+		return nil, err
+	}
 	f, err := os.Create(m.getFilePath(filename))
 	if err != nil {
 		return nil, err
@@ -129,7 +133,7 @@ func encodeImage(w io.Writer, img image.Image, filename string) (err error) {
 	case ".png":
 		return png.Encode(w, img)
 	default:
-		return image.ErrFormat
+		return ErrUnsupportedFormat
 	}
 }
 
@@ -145,21 +149,24 @@ func createImageStat(f *os.File, img image.Image, filename string) (*ImageStat, 
 	}
 	size := img.Bounds().Size()
 	return &ImageStat{
-		Name:   filename,
+		ID:     filename,
 		Width:  uint(size.X),
 		Height: uint(size.Y),
 		Size:   info.Size(),
 	}, nil
 }
 
-type ResizeResult struct {
-	Before *ImageStat
-	After  *ImageStat
+type ImageStat struct {
+	ID     string `json:"id"`
+	Width  uint   `json:"width"`
+	Height uint   `json:"height"`
+	Size   int64  `json:"size"`
 }
 
-type ImageStat struct {
-	Name   string
-	Width  uint
-	Height uint
-	Size   int64
+func (m *ImageStat) MustMarshal() []byte {
+	b, err := json.Marshal(m)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }

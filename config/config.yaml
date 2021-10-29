@@ -5,5 +5,12 @@ filesService:
 storage:
   filesDir: ./data/images
 
+processingService:
+  resizePower: 4
+
 rabbitmq:
-  url: amqp://test:secret@rabbit1:5672/
+  host: rabbit1
+  user: test
+  password: secret
+  addr: :5672
+  queueName: processing

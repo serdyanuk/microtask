@@ -27,11 +27,16 @@ type FilesService struct {
 
 // ProcessingService config
 type ProcessingService struct {
+	ResizePower uint8
 }
 
 // Rabbitmq config
 type Rabbitmq struct {
-	URL string
+	Host      string
+	User      string
+	Password  string
+	Addr      string
+	QueueName string
 }
 
 // Storage config
