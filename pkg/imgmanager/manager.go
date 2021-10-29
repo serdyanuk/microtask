@@ -138,7 +138,7 @@ func encodeImage(w io.Writer, img image.Image, filename string) (err error) {
 	case ".png":
 		return png.Encode(w, img)
 	default:
-		return ErrUnsupportedFormat
+		return image.ErrFormat
 	}
 }
 
@@ -183,4 +183,8 @@ func (m ImageStat) String() string {
 	}
 
 	return fmt.Sprintf("id=%s x=%d y=%d size=%.2fK", m.ID, m.Width, m.Height, kb)
+}
+
+func IsUnknowFormatErr(err error) bool {
+	return errors.Is(err, image.ErrFormat)
 }
