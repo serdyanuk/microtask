@@ -61,6 +61,10 @@ func (m *ImgManager) ReadAndSaveNewImage(r io.Reader) (stat *ImageStat, err erro
 	return stat, nil
 }
 
+// LoadAndResize - loaded and resize image
+// power means how much to divide the loaded image size
+// for example if power = 2 then image width and height will be divided by power
+// if power == 0 || power > MaxResizePower then power = MaxResizePower
 func (m *ImgManager) LoadAndResize(filename string, power uint8) (*ImageStat, error) {
 	if power == 0 || power > MaxResizePower {
 		power = MaxResizePower
