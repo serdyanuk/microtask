@@ -17,8 +17,6 @@ import (
 
 const MaxResizePower = 10
 
-var ErrUnsupportedFormat = errors.New("imgmanager: unsupported format")
-
 type ImgManager struct {
 	path string
 }
