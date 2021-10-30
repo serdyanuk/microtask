@@ -24,11 +24,15 @@ func NewProcessingConsumer(cfg *config.Rabbitmq, logger *logger.Logger) (*Proces
 	}, nil
 }
 
-func (c *ProcessingConsumer) CreateChannel() (ch *amqp.Channel, q string, err error) {
+func (c *ProcessingConsumer) CreateChannel() (ch *amqp.Channel, err error) {
 	ch, err = c.conn.Channel()
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
+	return ch, nil
+}
+
+func (c *ProcessingConsumer) QueueDeclare(ch *amqp.Channel) (queueName string, err error) {
 	queue, err := ch.QueueDeclare(
 		c.cfg.QueueName,
 		true,
@@ -38,9 +42,9 @@ func (c *ProcessingConsumer) CreateChannel() (ch *amqp.Channel, q string, err er
 		nil,
 	)
 	if err != nil {
-		return nil, "", err
+		return "", err
 	}
-	return ch, queue.Name, nil
+	return queue.Name, nil
 }
 
 func (c *ProcessingConsumer) Consume(ch *amqp.Channel, queueName string) (<-chan amqp.Delivery, error) {
