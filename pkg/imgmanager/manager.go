@@ -33,6 +33,8 @@ func New(path string) *ImgManager {
 	}
 }
 
+// checkfolder - checks the existence of the folder where files will be saved
+// if there is no folder then the function will try a new folder otherwise an error will be returned
 func (m *ImgManager) checkFolder() error {
 	err := os.MkdirAll(m.path, 0755)
 	if os.IsExist(err) {

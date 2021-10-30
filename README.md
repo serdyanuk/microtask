@@ -19,6 +19,10 @@ http://localhost:3000/
 ```
 ./config/config.yaml
 ```
+## Tests:
+```
+$ make test
+```
 
 ## Solution notes
 
