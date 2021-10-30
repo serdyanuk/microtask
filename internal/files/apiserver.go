@@ -19,7 +19,6 @@ import (
 var (
 	doneSignal      = make(chan os.Signal, 1)
 	shutdownTimeout = time.Second * 10
-	errCh           = make(chan error)
 )
 
 type ApiServer struct {
@@ -55,26 +54,27 @@ func (s *ApiServer) Run() {
 
 	go s.runHttpServer()
 
-	select {
-	case err := <-errCh:
-		s.logger.Fatal(err)
-		return
-	case <-doneSignal:
-		s.shutdown(shutdownTimeout)
-	}
+	<-doneSignal
+	s.shutdown(shutdownTimeout)
 }
 
 func (a *ApiServer) runHttpServer() {
 	a.logger.WithField("ADDR", a.httpServer.Addr).Info("HTTP running")
-	errCh <- a.httpServer.ListenAndServe()
+
+	err := a.httpServer.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		a.logger.Fatal(err)
+	}
 }
 
 func (s *ApiServer) shutdown(timeout time.Duration) {
-	s.logger.Info("App gracefuly shutdown...")
+	s.logger.Info("Server gracefuly shutdown...")
 
-	ctx, _ := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
 	err := s.httpServer.Shutdown(ctx)
 	if err != nil {
-		logrus.Error(err)
+		logrus.Fatal("Server shutdown error: ", err)
 	}
 }
