@@ -27,11 +27,10 @@ type Resizer interface {
 
 // New creates a new ImgManager
 // path - is path to files
-func New(path string) (*ImgManager, error) {
-	m := &ImgManager{
+func New(path string) *ImgManager {
+	return &ImgManager{
 		path: path,
 	}
-	return m, nil
 }
 
 func (m *ImgManager) checkFolder() error {

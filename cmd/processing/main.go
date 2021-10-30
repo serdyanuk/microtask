@@ -17,10 +17,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	imgm, err := imgmanager.New(cfg.Storage.FilesDir)
-	if err != nil {
-		logger.Fatal(err)
-	}
+	imgm := imgmanager.New(cfg.Storage.FilesDir)
 
 	o := processing.NewOptimizer(cfg.ProcessingService, consumer, imgm, logger)
 	logger.Fatal(o.Run())
