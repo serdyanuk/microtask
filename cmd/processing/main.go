@@ -12,6 +12,11 @@ func main() {
 	cfg := config.Get()
 	logger := logger.Get()
 
+	err := cfg.ProcessingService.ValidateConfig()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	consumer, err := rabbitmq.NewProcessingConsumer(&cfg.Rabbitmq, logger)
 	if err != nil {
 		logger.Fatal(err)

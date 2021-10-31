@@ -43,7 +43,9 @@ func (o *Optimizer) Run() error {
 		return err
 	}
 
-	go o.reader(msgs)
+	for i := 0; i < o.cfg.WorkerPoolSize; i++ {
+		go o.reader(msgs)
+	}
 
 	o.logger.Info("Processing service is ready to receive messages")
 

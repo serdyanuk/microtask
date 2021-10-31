@@ -6,6 +6,7 @@ storage:
 
 processingService:
   resizePower: 4
+  workerPoolSize: 4
 
 rabbitmq:
   host: rabbit1

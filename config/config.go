@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -27,7 +28,15 @@ type FilesService struct {
 
 // ProcessingService config
 type ProcessingService struct {
-	ResizePower uint8
+	ResizePower    uint8
+	WorkerPoolSize int
+}
+
+func (cfg ProcessingService) ValidateConfig() error {
+	if cfg.WorkerPoolSize <= 0 {
+		return fmt.Errorf("processingService: workerPoolSize option must be greater than 0, got %d", cfg.WorkerPoolSize)
+	}
+	return nil
 }
 
 // Rabbitmq config
