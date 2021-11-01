@@ -3,22 +3,25 @@ module github.com/serdyanuk/microtask
 go 1.17
 
 require (
-	github.com/antelman107/net-wait-go v0.0.0-20210623112055-cf684aebda7b // indirect
+	github.com/antelman107/net-wait-go v0.0.0-20210623112055-cf684aebda7b
+	github.com/google/uuid v1.3.0
+	github.com/julienschmidt/httprouter v1.3.0
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/viper v1.9.0
+	github.com/streadway/amqp v1.0.0
+)
+
+require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/spf13/viper v1.9.0 // indirect
-	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
 	golang.org/x/text v0.3.6 // indirect
