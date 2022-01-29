@@ -32,5 +32,3 @@ receives a message about the arrival of a new file, which contains: file ID, Wid
 2. Service API loads the required image from disk, and applies optimization to it, resizing it with the specified ResizePower parameter from the configuration file, after which the result and new image data are output to the console
 
 3. Two image formats are supported: jpg / jpeg and png
-## Task
-https://softcery.notion.site/Test-Task-Junior-Go-Developer-0b649d4310454c8588610b15a63eb376
