@@ -13,6 +13,7 @@ var (
 	once   sync.Once
 )
 
+// Config contains all configuration.
 type Config struct {
 	FilesService
 	ProcessingService
@@ -20,18 +21,19 @@ type Config struct {
 	Storage
 }
 
-// FilesService config
+// FilesService represents files service config.
 type FilesService struct {
 	Port          string
 	FileSizeLimit string
 }
 
-// ProcessingService config
+// ProcessingService represents processing service config.
 type ProcessingService struct {
 	ResizePower    uint8
 	WorkerPoolSize int
 }
 
+// ValidateConfig is used for validation processing service config.
 func (cfg ProcessingService) ValidateConfig() error {
 	if cfg.WorkerPoolSize <= 0 {
 		return fmt.Errorf("processingService: workerPoolSize option must be greater than 0, got %d", cfg.WorkerPoolSize)
@@ -39,7 +41,7 @@ func (cfg ProcessingService) ValidateConfig() error {
 	return nil
 }
 
-// Rabbitmq config
+// Rabbitmq represnets a Rabbitmq config.
 type Rabbitmq struct {
 	Host      string
 	User      string
@@ -48,11 +50,12 @@ type Rabbitmq struct {
 	QueueName string
 }
 
-// Storage config
+// Storage represents a storage config
 type Storage struct {
 	FilesDir string
 }
 
+// Get is used to getting config once.
 func Get() *Config {
 	once.Do(func() {
 		viper.SetConfigName("config")

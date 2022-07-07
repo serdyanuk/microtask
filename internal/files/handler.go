@@ -13,6 +13,7 @@ import (
 // fileSizeLimit 		= 5mb
 const fileSizeLimit = 5 << 20
 
+// uploadImage handles http request for uploading an image.
 func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPublisher, logger *logger.Logger) httprouter.Handle {
 	return func(rw http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		rw.Header().Add("Access-Control-Allow-Origin", "*")
@@ -47,6 +48,7 @@ func uploadImage(imgm *imgmanager.ImgManager, publisher *rabbitmq.ProcessingPubl
 	}
 }
 
+// internalError is used as wrapper for http response with 500 status.
 func internalError(rw http.ResponseWriter, logger *logger.Logger, err error) {
 	logger.Error(err)
 	http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

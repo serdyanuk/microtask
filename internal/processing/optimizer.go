@@ -10,6 +10,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// Optimizer represents processing service.
 type Optimizer struct {
 	cfg      config.ProcessingService
 	consumer *rabbitmq.ProcessingConsumer
@@ -17,6 +18,7 @@ type Optimizer struct {
 	logger   *logger.Logger
 }
 
+// NewOptimizer is used to create processing service.
 func NewOptimizer(cfg config.ProcessingService, consumer *rabbitmq.ProcessingConsumer, resizer imgmanager.Resizer, logger *logger.Logger) *Optimizer {
 	return &Optimizer{
 		cfg:      cfg,

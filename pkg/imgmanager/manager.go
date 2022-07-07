@@ -33,7 +33,7 @@ func New(path string) *ImgManager {
 	}
 }
 
-// checkfolder - checks the existence of the folder where files will be saved
+// checkFolder checks the existence of the folder where files will be saved
 // if there is no folder then the function will try a new folder otherwise an error will be returned
 func (m *ImgManager) checkFolder() error {
 	err := os.MkdirAll(m.path, 0755)
@@ -60,7 +60,7 @@ func (m *ImgManager) ReadAndSaveNewImage(r io.Reader) (stat *ImageStat, err erro
 	return stat, nil
 }
 
-// LoadAndResize - loaded and resize image
+// LoadAndResize loaded and resize image
 // power means how much to divide the loaded image size
 // for example if power = 2 then image width and height will be divided by power
 // if power == 0 || power > MaxResizePower then power = MaxResizePower
@@ -82,6 +82,7 @@ func (m *ImgManager) LoadAndResize(filename string, power uint8) (*ImageStat, er
 	return newStat, nil
 }
 
+// resize is used to resize passed image.
 func (m *ImgManager) resize(img image.Image, power uint8) image.Image {
 	p := img.Bounds().Size()
 	x := uint(p.X) / uint(power)
@@ -90,6 +91,7 @@ func (m *ImgManager) resize(img image.Image, power uint8) image.Image {
 	return resize.Resize(x, y, img, resize.Lanczos3)
 }
 
+// save saves passed image in fs.
 func (m *ImgManager) save(img image.Image, filename string) (stat *ImageStat, err error) {
 	if err = m.checkFolder(); err != nil {
 		return nil, err
@@ -107,10 +109,12 @@ func (m *ImgManager) save(img image.Image, filename string) (stat *ImageStat, er
 	return createImageStat(f, img, filename)
 }
 
+// getFilePath is used for getting file path based on file name.
 func (m *ImgManager) getFilePath(filename string) string {
 	return filepath.Join(m.path, filename)
 }
 
+// loadImage is used to load image from fs.
 func (m *ImgManager) loadImage(filename string) (img image.Image, stat *ImageStat, err error) {
 	f, err := os.Open(m.getFilePath(filename))
 	if err != nil {
