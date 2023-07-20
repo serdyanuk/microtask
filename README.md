@@ -1,6 +1,6 @@
 # Microtask Application
 ## Docker development usage:
-### Start app
+### Start APP
 
 ```
 $ docker-compose up 
