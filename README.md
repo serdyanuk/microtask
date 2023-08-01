@@ -1,4 +1,4 @@
-# Microtask application #2
+# Microtask application 
 ## Docker development usage:
 ### Start APP
 
